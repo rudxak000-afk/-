@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Самостійна робота №1. Варіант 9</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background: #f3f5f9;
+      color: #1f2937;
+      line-height: 1.5;
+    }
+    header {
+      background: #1e3a8a;
+      color: #fff;
+      padding: 20px 32px;
+    }
+    header h1 { margin: 0 0 6px; font-size: 22px; }
+    header p { margin: 2px 0; font-size: 15px; opacity: .95; }
+    main { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+    .task {
+      background: #fff;
+      border-left: 5px solid #1e3a8a;
+      border-radius: 6px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    .task h2 { margin: 0 0 8px; font-size: 18px; }
+    .status { font-size: 13px; color: #6b7280; margin-bottom: 16px; }
+    .status.error { color: #b91c1c; }
+    .groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(310px, 1fr)); gap: 20px; }
+    .group {
+      background: #fff;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.1);
+    }
+    .group h3 {
+      margin: 0;
+      padding: 14px 16px;
+      background: #2563eb;
+      color: #fff;
+      font-size: 17px;
+    }
+    .group:nth-child(2) h3 { background: #0f766e; }
+    .group:nth-child(3) h3 { background: #7c3aed; }
+    .group ul { list-style: none; margin: 0; padding: 0; }
+    .discipline { padding: 12px 16px; border-bottom: 1px solid #e5e7eb; }
+    .discipline:last-child { border-bottom: none; }
+    .discipline .name { font-weight: 600; }
+    .discipline .meta { font-size: 13px; color: #4b5563; margin-top: 2px; }
+    .group .total { padding: 10px 16px; background: #f9fafb; font-size: 14px; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Самостійна робота №1. Робота з хмарними сховищами</h1>
+    <p>Виконала: студентка групи АнД-31 Заяць М. В.</p>
+    <p>Варіант: 9</p>
+  </header>
+
+  <main>
+    <section class="task">
+      <h2>Завдання</h2>
+      <p>
+        У JSON-файлі, що зберігається у хмарному сховищі JSONBin, записано перелік основних
+        дисциплін для трьох освітніх програм. Необхідно зчитати інформацію, створити базовий клас
+        для роботи з даними та вивести дисципліни, поділивши їх за освітніми програмами.
+      </p>
+    </section>
+
+    <div id="status" class="status">Завантаження даних…</div>
+    <div id="groups" class="groups"></div>
+  </main>
+
+  <script>
+    // ---- Налаштування хмарного сховища ----
+    // Підставте ID вашого bin з https://jsonbin.io/ (вміст – файл data.json).
+    const BIN_ID = "ВАШ_BIN_ID";
+    const URL = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+    // Для приватного bin додайте ключ: { headers: { "X-Master-Key": "ВАШ_КЛЮЧ" } }
+    const OPTIONS = {};
+
+    // Резервні дані (використовуються, якщо хмарне сховище недоступне)
+    const FALLBACK = {"programs":[
+      {"name":"Аналітика даних","disciplines":[
+        {"name":"Математичний аналіз","credits":6,"semester":1,"control":"Іспит"},
+        {"name":"Програмування мовою Python","credits":5,"semester":2,"control":"Іспит"},
+        {"name":"Теорія ймовірностей та математична статистика","credits":5,"semester":3,"control":"Іспит"},
+        {"name":"Бази даних та SQL","credits":4,"semester":4,"control":"Залік"},
+        {"name":"Машинне навчання","credits":5,"semester":5,"control":"Іспит"}]},
+      {"name":"Інженерія програмного забезпечення","disciplines":[
+        {"name":"Алгоритми та структури даних","credits":6,"semester":2,"control":"Іспит"},
+        {"name":"Об'єктно-орієнтоване програмування","credits":5,"semester":3,"control":"Іспит"},
+        {"name":"Проєктування та розробка веб-застосувань","credits":4,"semester":4,"control":"Залік"},
+        {"name":"Тестування програмного забезпечення","credits":4,"semester":5,"control":"Залік"},
+        {"name":"Архітектура програмних систем","credits":5,"semester":6,"control":"Іспит"}]},
+      {"name":"Інтелектуальні технології","disciplines":[
+        {"name":"Дискретна математика","credits":5,"semester":1,"control":"Іспит"},
+        {"name":"Основи штучного інтелекту","credits":5,"semester":3,"control":"Іспит"},
+        {"name":"Експертні системи","credits":4,"semester":4,"control":"Залік"},
+        {"name":"Обробка природної мови","credits":5,"semester":5,"control":"Іспит"},
+        {"name":"Нейронні мережі","credits":5,"semester":6,"control":"Іспит"}]}
+    ]};
+
+    // ---- Базовий клас для роботи з даними ----
+    class Discipline {
+      constructor({ name, credits, semester, control }) {
+        this.name = name;
+        this.credits = credits;
+        this.semester = semester;
+        this.control = control;
+      }
+
+      toHTML() {
+        return `
+          <li class="discipline">
+            <div class="name">${this.name}</div>
+            <div class="meta">${this.semester} семестр · ${this.credits} кредитів · ${this.control}</div>
+          </li>`;
+      }
+    }
+
+    // Клас освітньої програми: група дисциплін
+    class Program {
+      constructor({ name, disciplines }) {
+        this.name = name;
+        this.disciplines = disciplines.map(d => new Discipline(d));
+      }
+
+      get totalCredits() {
+        return this.disciplines.reduce((sum, d) => sum + d.credits, 0);
+      }
+
+      toHTML() {
+        return `
+          <section class="group">
+            <h3>${this.name}</h3>
+            <ul>${this.disciplines.map(d => d.toHTML()).join("")}</ul>
+            <div class="total">Усього: ${this.disciplines.length} дисциплін, ${this.totalCredits} кредитів</div>
+          </section>`;
+      }
+    }
+
+    // ---- Робота з хмарним сховищем ----
+    async function loadData() {
+      const response = await fetch(URL, OPTIONS);
+      if (!response.ok) {
+        throw new Error(`Помилка HTTP: ${response.status}`);
+      }
+      const json = await response.json();
+      return json.record ?? json;   // JSONBin v3 повертає дані у полі "record"
+    }
+
+    function render(data) {
+      const programs = data.programs.map(p => new Program(p));
+      document.getElementById("groups").innerHTML = programs.map(p => p.toHTML()).join("");
+    }
+
+    async function init() {
+      const status = document.getElementById("status");
+      try {
+        render(await loadData());
+        status.textContent = "Дані отримано з хмарного сховища JSONBin.";
+      } catch (err) {
+        console.error(err);
+        render(FALLBACK);
+        status.textContent = "Хмарне сховище недоступне (" + err.message + "). Показано резервні дані.";
+        status.classList.add("error");
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

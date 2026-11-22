@@ -1,0 +1,34 @@
+{
+  "programs": [
+    {
+      "name": "Аналітика даних",
+      "disciplines": [
+        { "name": "Математичний аналіз", "credits": 6, "semester": 1, "control": "Іспит" },
+        { "name": "Програмування мовою Python", "credits": 5, "semester": 2, "control": "Іспит" },
+        { "name": "Теорія ймовірностей та математична статистика", "credits": 5, "semester": 3, "control": "Іспит" },
+        { "name": "Бази даних та SQL", "credits": 4, "semester": 4, "control": "Залік" },
+        { "name": "Машинне навчання", "credits": 5, "semester": 5, "control": "Іспит" }
+      ]
+    },
+    {
+      "name": "Інженерія програмного забезпечення",
+      "disciplines": [
+        { "name": "Алгоритми та структури даних", "credits": 6, "semester": 2, "control": "Іспит" },
+        { "name": "Об'єктно-орієнтоване програмування", "credits": 5, "semester": 3, "control": "Іспит" },
+        { "name": "Проєктування та розробка веб-застосувань", "credits": 4, "semester": 4, "control": "Залік" },
+        { "name": "Тестування програмного забезпечення", "credits": 4, "semester": 5, "control": "Залік" },
+        { "name": "Архітектура програмних систем", "credits": 5, "semester": 6, "control": "Іспит" }
+      ]
+    },
+    {
+      "name": "Інтелектуальні технології",
+      "disciplines": [
+        { "name": "Дискретна математика", "credits": 5, "semester": 1, "control": "Іспит" },
+        { "name": "Основи штучного інтелекту", "credits": 5, "semester": 3, "control": "Іспит" },
+        { "name": "Експертні системи", "credits": 4, "semester": 4, "control": "Залік" },
+        { "name": "Обробка природної мови", "credits": 5, "semester": 5, "control": "Іспит" },
+        { "name": "Нейронні мережі", "credits": 5, "semester": 6, "control": "Іспит" }
+      ]
+    }
+  ]
+}
